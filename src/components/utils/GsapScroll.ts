@@ -32,31 +32,36 @@ export function setCharTimeline(
       invalidateOnRefresh: true,
     },
   });
-  let screenLight: any, monitor: any;
-  character?.children.forEach((object: any) => {
+  let screenLight: THREE.Mesh | null = null,
+    monitor: THREE.Mesh | null = null;
+  character?.children.forEach((object: THREE.Object3D) => {
     if (object.name === "Plane004") {
-      object.children.forEach((child: any) => {
-        child.material.transparent = true;
-        child.material.opacity = 0;
-        if (child.material.name === "Material.027") {
-          monitor = child;
-          child.material.color.set("#FFFFFF");
+      object.children.forEach((child: THREE.Object3D) => {
+        const mesh = child as THREE.Mesh;
+        const material = mesh.material as THREE.MeshPhysicalMaterial;
+        material.transparent = true;
+        material.opacity = 0;
+        if (material.name === "Material.027") {
+          monitor = mesh;
+          material.color.set("#FFFFFF");
         }
       });
     }
     if (object.name === "screenlight") {
+      const mesh = object as THREE.Mesh;
+      const material = mesh.material as THREE.MeshPhysicalMaterial;
       // Cleaner flicker logic using GSAP
-      gsap.to(object.material, {
+      gsap.to(material, {
         emissiveIntensity: 6,
         duration: 0.1,
         repeat: -1,
         yoyo: true,
         repeatDelay: 0.1,
       });
-      screenLight = object;
+      screenLight = mesh;
     }
   });
-  let neckBone = character?.getObjectByName("spine005");
+  const neckBone = character?.getObjectByName("spine005");
   if (window.innerWidth > 1024) {
     if (character) {
       tl1
@@ -83,8 +88,8 @@ export function setCharTimeline(
         )
         .to(character.rotation, { y: 0.92, x: 0.12, delay: 3, duration: 3 }, 0)
         .to(neckBone!.rotation, { x: 0.6, delay: 2, duration: 3 }, 0)
-        .to(monitor.material, { opacity: 1, duration: 0.8, delay: 3.2 }, 0)
-        .to(screenLight.material, { opacity: 1, duration: 0.8, delay: 4.5 }, 0)
+        .to(monitor!.material, { opacity: 1, duration: 0.8, delay: 3.2 }, 0)
+        .to(screenLight!.material, { opacity: 1, duration: 0.8, delay: 4.5 }, 0)
         .fromTo(
           ".what-box-in",
           { display: "none" },
@@ -92,7 +97,7 @@ export function setCharTimeline(
           0
         )
         .fromTo(
-          monitor.position,
+          monitor!.position,
           { y: -10, z: 2 },
           { y: 0, z: 0, delay: 1.5, duration: 3 },
           0
